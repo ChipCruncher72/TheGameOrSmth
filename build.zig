@@ -33,6 +33,12 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    exe.subsystem = switch (exe.rootModuleTarget().os.tag) {
+        .windows => .Windows,
+        // NOTE: Change this line to `else => exe.subsystem`???
+        //  Need linux/macos testers to confirm
+        else => .Posix,
+    };
     exe.linkLibrary(raylib_artifact);
     exe.root_module.addImport("raylib", raylib);
     exe.root_module.addImport("raygui", raygui);
