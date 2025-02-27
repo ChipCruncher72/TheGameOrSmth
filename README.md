@@ -8,6 +8,7 @@ you should also be able to find the executable in `zig-out/bin` afterwards, make
 ### Controls:
 - WASD/Arrow keys - move player
 - U - enable unlimited fps press U again to set it back to 60
-- F1 - shows debug information (i.e. FPS, player position, camera zoom)\
+- F1 - shows debug information (i.e. FPS, player position, player rotation, camera zoom)\
    Press F1 again to disable it
 - +/- keys - change camera zoom
+- </> keys - rotate player

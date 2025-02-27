@@ -55,7 +55,14 @@ pub const Player = struct {
     }
 
     pub fn getHitbox(self: Player) Wall {
-        return Wall{ .rect = self.body };
+        return Wall{
+            .rect = .{
+                .x = self.body.x - (self.body.width/2),
+                .y = self.body.y - (self.body.height/2),
+                .height = self.body.height,
+                .width = self.body.width,
+            }
+        };
     }
 
     pub fn update(self: *Player, walls: []const Wall) void {
@@ -63,7 +70,7 @@ pub const Player = struct {
             self.body.y -= self.movement_speed * deltaTime();
             for (walls) |wall| {
                 if (wall.isColliding(self.getHitbox())) {
-                    const col_rect = wall.rect.getCollision(self.body);
+                    const col_rect = wall.rect.getCollision(self.getHitbox().rect);
                     self.body.y += col_rect.height;
                     break;
                 }
@@ -73,7 +80,7 @@ pub const Player = struct {
             self.body.y += self.movement_speed * deltaTime();
             for (walls) |wall| {
                 if (wall.isColliding(self.getHitbox())) {
-                    const col_rect = wall.rect.getCollision(self.body);
+                    const col_rect = wall.rect.getCollision(self.getHitbox().rect);
                     self.body.y -= col_rect.height;
                     break;
                 }
@@ -83,7 +90,7 @@ pub const Player = struct {
             self.body.x -= self.movement_speed * deltaTime();
             for (walls) |wall| {
                 if (wall.isColliding(self.getHitbox())) {
-                    const col_rect = wall.rect.getCollision(self.body);
+                    const col_rect = wall.rect.getCollision(self.getHitbox().rect);
                     self.body.x += col_rect.width;
                     break;
                 }
@@ -93,23 +100,40 @@ pub const Player = struct {
             self.body.x += self.movement_speed * deltaTime();
             for (walls) |wall| {
                 if (wall.isColliding(self.getHitbox())) {
-                    const col_rect = wall.rect.getCollision(self.body);
+                    const col_rect = wall.rect.getCollision(self.getHitbox().rect);
                     self.body.x -= col_rect.width;
                     break;
                 }
             }
         }
+
+        if (rl.isKeyDown(.comma)) {
+            self.rotation -= 50 * deltaTime();
+        }
+        if (rl.isKeyDown(.period)) {
+            self.rotation += 50 * deltaTime();
+        }
+        if (self.rotation >= 360) {
+            self.rotation = 0;
+        }
+        if (self.rotation < 0) {
+            self.rotation = 359;
+        }
     }
 
     pub fn draw(self: Player) void {
-        rl.drawRectanglePro(self.body, rl.Vector2.zero(), self.rotation, rl.Color.red);
+        const drawn_pos = rl.Vector2{
+            .x = self.body.width/2,
+            .y = self.body.height/2,
+        };
+        rl.drawRectanglePro(self.body, drawn_pos, self.rotation, rl.Color.red);
         if (self.face) |txtr| {
-            txtr.drawEx(
-                .{ .x = self.body.x, .y = self.body.y },
-                self.rotation,
-                self.body.height/@as(f32, @floatFromInt(txtr.width)),
-                rl.Color.white
-            );
+            txtr.drawPro(rl.Rectangle{
+                .x = 0,
+                .y = 0,
+                .width = @floatFromInt(txtr.width),
+                .height = @floatFromInt(txtr.height),
+            }, self.body, drawn_pos, self.rotation, rl.Color.white);
         }
     }
 

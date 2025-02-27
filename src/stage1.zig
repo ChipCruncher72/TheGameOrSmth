@@ -58,8 +58,8 @@ pub fn update(self: *Self) void {
 
     self.player.update(self.walls.items);
     self.camera.target = .{
-        .x = self.player.body.x + (self.player.body.width/2),
-        .y = self.player.body.y + (self.player.body.height/2),
+        .x = self.player.body.x,
+        .y = self.player.body.y,
     };
     self.camera.offset = .{
         .x = objects.screenWidthFloat()/2,
@@ -76,11 +76,13 @@ pub fn drawUI(self: *Self) !void {
         const y_pos = try std.fmt.allocPrintZ(allocator, "Y: {d:.1}", .{self.player.body.y});
         const cam_zoom = try std.fmt.allocPrintZ(allocator, "ZOOM: {d:.1}", .{self.camera.zoom});
         const fps_count = try std.fmt.allocPrintZ(allocator, "FPS: {d}", .{rl.getFPS()});
+        const rotation = try std.fmt.allocPrintZ(allocator, "ROT: {d:.1}", .{self.player.rotation});
 
-        rl.drawText(x_pos, 10, 10, 35, rl.Color.white);
-        rl.drawText(y_pos, 10, 50, 35, rl.Color.white);
-        rl.drawText(cam_zoom, 10, 90, 35, rl.Color.white);
-        rl.drawText(fps_count, 10, 130, 35, rl.Color.white);
+        rl.drawText(x_pos, 10, 10, 30, rl.Color.white);
+        rl.drawText(y_pos, 10, 45, 30, rl.Color.white);
+        rl.drawText(cam_zoom, 10, 80, 30, rl.Color.white);
+        rl.drawText(fps_count, 10, 115, 30, rl.Color.white);
+        rl.drawText(rotation, 10, 150, 30, rl.Color.white);
     }
 }
 
