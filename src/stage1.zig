@@ -22,8 +22,8 @@ pub fn init(allocator: std.mem.Allocator) !Self {
     };
     self.camera = .{
         .target = .{
-            .x = self.player.body.x + (self.player.body.width/2),
-            .y = self.player.body.y + (self.player.body.height/2),
+            .x = self.player.body.x,
+            .y = self.player.body.y,
         },
         .offset = .{
             .x = objects.screenWidthFloat()/2,
