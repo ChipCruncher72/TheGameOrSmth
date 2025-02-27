@@ -9,9 +9,7 @@ pub fn screenHeightFloat() f32 {
     return @floatFromInt(rl.getScreenHeight());
 }
 
-pub fn deltaTime() f32 {
-    return rl.getFrameTime();
-}
+pub const deltaTime = rl.getFrameTime();
 
 pub const Wall = struct {
     rect: rl.Rectangle,
