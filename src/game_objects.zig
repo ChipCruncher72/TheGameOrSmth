@@ -67,8 +67,9 @@ pub const Player = struct {
         if (rl.isKeyDown(.up) or rl.isKeyDown(.w)) {
             self.body.y -= self.movement_speed * deltaTime();
             for (walls) |wall| {
-                if (wall.isColliding(self.getHitbox())) {
-                    const col_rect = wall.rect.getCollision(self.getHitbox().rect);
+                const hitbox = self.getHitbox();
+                if (wall.isColliding(hitbox)) {
+                    const col_rect = wall.rect.getCollision(hitbox.rect);
                     self.body.y += col_rect.height;
                     break;
                 }
@@ -77,8 +78,9 @@ pub const Player = struct {
         if (rl.isKeyDown(.down) or rl.isKeyDown(.s)) {
             self.body.y += self.movement_speed * deltaTime();
             for (walls) |wall| {
-                if (wall.isColliding(self.getHitbox())) {
-                    const col_rect = wall.rect.getCollision(self.getHitbox().rect);
+                const hitbox = self.getHitbox();
+                if (wall.isColliding(hitbox)) {
+                    const col_rect = wall.rect.getCollision(hitbox.rect);
                     self.body.y -= col_rect.height;
                     break;
                 }
@@ -87,8 +89,9 @@ pub const Player = struct {
         if (rl.isKeyDown(.left) or rl.isKeyDown(.a)) {
             self.body.x -= self.movement_speed * deltaTime();
             for (walls) |wall| {
-                if (wall.isColliding(self.getHitbox())) {
-                    const col_rect = wall.rect.getCollision(self.getHitbox().rect);
+                const hitbox = self.getHitbox();
+                if (wall.isColliding(hitbox)) {
+                    const col_rect = wall.rect.getCollision(hitbox.rect);
                     self.body.x += col_rect.width;
                     break;
                 }
@@ -97,8 +100,9 @@ pub const Player = struct {
         if (rl.isKeyDown(.right) or rl.isKeyDown(.d)) {
             self.body.x += self.movement_speed * deltaTime();
             for (walls) |wall| {
-                if (wall.isColliding(self.getHitbox())) {
-                    const col_rect = wall.rect.getCollision(self.getHitbox().rect);
+                const hitbox = self.getHitbox();
+                if (wall.isColliding(hitbox)) {
+                    const col_rect = wall.rect.getCollision(hitbox.rect);
                     self.body.x -= col_rect.width;
                     break;
                 }
