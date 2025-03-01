@@ -54,12 +54,32 @@ pub const Wall = struct {
     }
 };
 
+pub const Face = struct {
+    txtr: rl.Texture2D,
+    draw_x: f32 = 0,
+    draw_y: f32 = 0,
+    draw_width: f32,
+    draw_height: f32,
+    sprite_chunks: f32,
+
+    pub fn init(txtr: rl.Texture2D, sprite_chunks: f32) Face {
+        var self = Face{
+            .txtr = txtr,
+            .sprite_chunks = sprite_chunks,
+            .draw_width = undefined,
+            .draw_height = undefined,
+        };
+        self.draw_width = @as(f32, @floatFromInt(txtr.width))/sprite_chunks;
+        self.draw_height = @floatFromInt(txtr.height);
+        return self;
+    }
+};
+
 pub const Player = struct {
     body: rl.Rectangle,
-    face: ?rl.Texture2D,
+    face: ?Face,
     movement_speed: f32 = 300,
     rotation: f32 = 0,
-    draw_x: f32 = 0,
     limiter: RateLimiter = RateLimiter.init(0.5),
 
     pub fn init(body_w: f32, body_h: f32, face_txtr: ?rl.Texture2D) Player {
@@ -70,7 +90,7 @@ pub const Player = struct {
                 .width = body_w,
                 .height = body_h,
             },
-            .face = face_txtr,
+            .face = if (face_txtr) |txtr| Face.init(txtr, 2) else null,
         };
     }
 
@@ -97,8 +117,9 @@ pub const Player = struct {
                     break;
                 }
             }
-            if (do_update) {
-                self.draw_x = if (self.draw_x == 0) self.body.width else 0;
+            if (do_update and self.face != null) {
+                const face = &self.face.?;
+                face.draw_x = if (face.draw_x == 0) face.draw_width else 0;
                 do_update = false;
             }
         }
@@ -112,8 +133,9 @@ pub const Player = struct {
                     break;
                 }
             }
-            if (do_update) {
-                self.draw_x = if (self.draw_x == 0) self.body.width else 0;
+            if (do_update and self.face != null) {
+                const face = &self.face.?;
+                face.draw_x = if (face.draw_x == 0) face.draw_width else 0;
                 do_update = false;
             }
         }
@@ -127,8 +149,9 @@ pub const Player = struct {
                     break;
                 }
             }
-            if (do_update) {
-                self.draw_x = if (self.draw_x == 0) self.body.width else 0;
+            if (do_update and self.face != null) {
+                const face = &self.face.?;
+                face.draw_x = if (face.draw_x == 0) face.draw_width else 0;
                 do_update = false;
             }
         }
@@ -142,8 +165,9 @@ pub const Player = struct {
                     break;
                 }
             }
-            if (do_update) {
-                self.draw_x = if (self.draw_x == 0) self.body.width else 0;
+            if (do_update and self.face != null) {
+                const face = &self.face.?;
+                face.draw_x = if (face.draw_x == 0) face.draw_width else 0;
                 do_update = false;
             }
         }
@@ -172,19 +196,19 @@ pub const Player = struct {
             .y = self.body.height/2,
         };
         rl.drawRectanglePro(self.body, drawn_pos, self.rotation, rl.Color.red);
-        if (self.face) |txtr| {
-            txtr.drawPro(rl.Rectangle{
-                .x = self.draw_x,
-                .y = 0,
-                .width = @as(f32, @floatFromInt(txtr.width))/2,
-                .height = @floatFromInt(txtr.height),
+        if (self.face) |face| {
+            face.txtr.drawPro(rl.Rectangle{
+                .x = face.draw_x,
+                .y = face.draw_y,
+                .width = face.draw_width,
+                .height = face.draw_height,
             }, self.body, drawn_pos, self.rotation, rl.Color.white);
         }
     }
 
     pub fn deinit(self: *Player) void {
-        if (self.face) |txtr| {
-            txtr.unload();
+        if (self.face) |face| {
+            face.txtr.unload();
             self.face = null;
         }
     }
