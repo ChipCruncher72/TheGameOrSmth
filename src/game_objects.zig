@@ -11,6 +11,26 @@ pub fn screenHeightFloat() f32 {
 
 pub const deltaTime = rl.getFrameTime;
 
+pub const RateLimiter = struct {
+    last_update_time: f64 = 0,
+    limit: f64,
+
+    pub fn init(limit_seconds: f64) RateLimiter {
+        return .{
+            .limit = limit_seconds,
+        };
+    }
+
+    pub fn check(self: *RateLimiter) bool {
+        const current_time = rl.getTime();
+        if (current_time - self.last_update_time >= self.limit) {
+            self.last_update_time = current_time;
+            return true;
+        }
+        return false;
+    }
+};
+
 pub const Wall = struct {
     rect: rl.Rectangle,
 
@@ -39,6 +59,8 @@ pub const Player = struct {
     face: ?rl.Texture2D,
     movement_speed: f32 = 300,
     rotation: f32 = 0,
+    draw_x: f32 = 0,
+    limiter: RateLimiter = RateLimiter.init(0.5),
 
     pub fn init(body_w: f32, body_h: f32, face_txtr: ?rl.Texture2D) Player {
         return .{
@@ -64,6 +86,7 @@ pub const Player = struct {
     }
 
     pub fn update(self: *Player, walls: []const Wall) void {
+        var do_update = self.limiter.check();
         if (rl.isKeyDown(.up) or rl.isKeyDown(.w)) {
             self.body.y -= self.movement_speed * deltaTime();
             for (walls) |wall| {
@@ -73,6 +96,10 @@ pub const Player = struct {
                     self.body.y += col_rect.height;
                     break;
                 }
+            }
+            if (do_update) {
+                self.draw_x = if (self.draw_x == 0) self.body.width else 0;
+                do_update = false;
             }
         }
         if (rl.isKeyDown(.down) or rl.isKeyDown(.s)) {
@@ -85,6 +112,10 @@ pub const Player = struct {
                     break;
                 }
             }
+            if (do_update) {
+                self.draw_x = if (self.draw_x == 0) self.body.width else 0;
+                do_update = false;
+            }
         }
         if (rl.isKeyDown(.left) or rl.isKeyDown(.a)) {
             self.body.x -= self.movement_speed * deltaTime();
@@ -96,6 +127,10 @@ pub const Player = struct {
                     break;
                 }
             }
+            if (do_update) {
+                self.draw_x = if (self.draw_x == 0) self.body.width else 0;
+                do_update = false;
+            }
         }
         if (rl.isKeyDown(.right) or rl.isKeyDown(.d)) {
             self.body.x += self.movement_speed * deltaTime();
@@ -106,6 +141,10 @@ pub const Player = struct {
                     self.body.x -= col_rect.width;
                     break;
                 }
+            }
+            if (do_update) {
+                self.draw_x = if (self.draw_x == 0) self.body.width else 0;
+                do_update = false;
             }
         }
 
@@ -131,9 +170,9 @@ pub const Player = struct {
         rl.drawRectanglePro(self.body, drawn_pos, self.rotation, rl.Color.red);
         if (self.face) |txtr| {
             txtr.drawPro(rl.Rectangle{
-                .x = 0,
+                .x = self.draw_x,
                 .y = 0,
-                .width = @floatFromInt(txtr.width),
+                .width = @as(f32, @floatFromInt(txtr.width))/2,
                 .height = @floatFromInt(txtr.height),
             }, self.body, drawn_pos, self.rotation, rl.Color.white);
         }
