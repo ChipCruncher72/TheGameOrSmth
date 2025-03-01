@@ -12,3 +12,4 @@ you should also be able to find the executable in `zig-out/bin` afterwards, make
    Press F1 again to disable it
 - +/- keys - change camera zoom
 - </> keys - rotate player
+- R - reset rotation to zero

@@ -160,6 +160,10 @@ pub const Player = struct {
         if (self.rotation < 0) {
             self.rotation = 359;
         }
+
+        if (rl.isKeyPressed(.r)) {
+            self.rotation = 0;
+        }
     }
 
     pub fn draw(self: Player) void {
