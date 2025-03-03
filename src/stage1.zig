@@ -3,21 +3,28 @@ const rl = @import("raylib");
 const objects = @import("game_objects.zig");
 const Self = @This();
 
+var USERNAME: ?[]const u8 = null;
+var DRAW_DEBUG_INFO = false;
+
 player: objects.Player,
 walls: std.ArrayList(objects.Wall),
 camera: rl.Camera2D,
-draw_dbg_info: bool,
 allocator: std.mem.Allocator,
 arena_allocator: std.heap.ArenaAllocator,
 
 pub fn init(allocator: std.mem.Allocator) !Self {
+    USERNAME = std.process.getEnvVarOwned(allocator, "USERNAME") catch |e|
+        if (e == error.EnviromentVariableNotFound)
+            std.process.getEnvVarOwned(allocator, "USER") catch null
+        else
+            null;
+
     const player_face = try rl.Texture2D.init("assets/guy.png");
     var self = Self{
         .player = objects.Player.init(45, 45, player_face),
         .walls = try std.ArrayList(objects.Wall).initCapacity(allocator, 100),
         .allocator = allocator,
         .camera = undefined,
-        .draw_dbg_info = false,
         .arena_allocator = std.heap.ArenaAllocator.init(allocator),
     };
     self.camera = .{
@@ -43,7 +50,7 @@ pub fn init(allocator: std.mem.Allocator) !Self {
 
 pub fn update(self: *Self) void {
     if (rl.isKeyPressed(.f1)) {
-        self.draw_dbg_info = !self.draw_dbg_info;
+        DRAW_DEBUG_INFO = !DRAW_DEBUG_INFO;
     }
 
     if (rl.isKeyDown(.equal)) {
@@ -68,7 +75,7 @@ pub fn update(self: *Self) void {
 }
 
 pub fn drawUI(self: *Self) !void {
-    if (self.draw_dbg_info) {
+    if (DRAW_DEBUG_INFO) {
         const allocator = self.arena_allocator.allocator();
         defer _ = self.arena_allocator.reset(.retain_capacity);
 
@@ -77,14 +84,7 @@ pub fn drawUI(self: *Self) !void {
         const cam_zoom = try std.fmt.allocPrintZ(allocator, "ZOOM: {d:.1}", .{self.camera.zoom});
         const fps_count = try std.fmt.allocPrintZ(allocator, "FPS: {d}", .{rl.getFPS()});
         const rotation = try std.fmt.allocPrintZ(allocator, "ROT: {d:.1}", .{self.player.rotation});
-        const name = try std.fmt.allocPrintZ(allocator, "NAME: {s}", .{
-            std.process.getEnvVarOwned(allocator, "USERNAME") catch |e|
-                if (e == error.EnviromentVariableNotFound)
-                    std.process.getEnvVarOwned(allocator, "USER") catch |e2|
-                        if (e2 == error.EnviromentVariableNotFound) "Unknown" else "CANT GET"
-                else
-                    "CANT GET"
-        });
+        const name = try std.fmt.allocPrintZ(allocator, "NAME: {s}", .{USERNAME orelse "Unknown"});
 
         rl.drawText(x_pos, 10, 10, 30, rl.Color.white);
         rl.drawText(y_pos, 10, 45, 30, rl.Color.white);
@@ -103,6 +103,10 @@ pub fn drawReal(self: Self) void {
 }
 
 pub fn deinit(self: *Self) void {
+    if (USERNAME) |USER| {
+        self.allocator.free(USER);
+        USERNAME = null;
+    }
     self.player.deinit();
     self.walls.deinit();
     self.arena_allocator.deinit();
