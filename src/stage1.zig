@@ -77,12 +77,21 @@ pub fn drawUI(self: *Self) !void {
         const cam_zoom = try std.fmt.allocPrintZ(allocator, "ZOOM: {d:.1}", .{self.camera.zoom});
         const fps_count = try std.fmt.allocPrintZ(allocator, "FPS: {d}", .{rl.getFPS()});
         const rotation = try std.fmt.allocPrintZ(allocator, "ROT: {d:.1}", .{self.player.rotation});
+        const name = try std.fmt.allocPrintZ(allocator, "NAME: {s}", .{
+            std.process.getEnvVarOwned(allocator, "USERNAME") catch |e|
+                if (e == error.EnviromentVariableNotFound)
+                    std.process.getEnvVarOwned(allocator, "USER") catch |e2|
+                        if (e2 == error.EnviromentVariableNotFound) "Unknown" else "CANT GET"
+                else
+                    "CANT GET"
+        });
 
         rl.drawText(x_pos, 10, 10, 30, rl.Color.white);
         rl.drawText(y_pos, 10, 45, 30, rl.Color.white);
         rl.drawText(cam_zoom, 10, 80, 30, rl.Color.white);
         rl.drawText(fps_count, 10, 115, 30, rl.Color.white);
         rl.drawText(rotation, 10, 150, 30, rl.Color.white);
+        rl.drawText(name, 10, 185, 30, rl.Color.white);
     }
 }
 
