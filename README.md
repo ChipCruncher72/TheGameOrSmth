@@ -13,3 +13,4 @@ you should also be able to find the executable in `zig-out/bin` afterwards, make
 - +/- keys - change camera zoom
 - </> keys - rotate player
 - R - reset rotation to zero
+- F11 - toggle fullscreen
