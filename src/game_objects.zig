@@ -90,7 +90,7 @@ pub const Player = struct {
                 .width = body_w,
                 .height = body_h,
             },
-            .face = if (face_txtr) |txtr| Face.init(txtr, 2) else null,
+            .face = if (face_txtr) |txtr| .init(txtr, 2) else null,
         };
     }
 

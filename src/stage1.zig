@@ -3,11 +3,13 @@ const rl = @import("raylib");
 const objects = @import("game_objects.zig");
 const Self = @This();
 
+const ArrayList = std.ArrayListUnmanaged;
+
 var USERNAME: ?[]const u8 = null;
 var DRAW_DEBUG_INFO = false;
 
 player: objects.Player,
-walls: std.ArrayList(objects.Wall),
+walls: ArrayList(objects.Wall),
 camera: rl.Camera2D,
 allocator: std.mem.Allocator,
 arena_allocator: std.heap.ArenaAllocator,
@@ -21,11 +23,11 @@ pub fn init(allocator: std.mem.Allocator) !Self {
 
     const player_face = try rl.Texture2D.init("assets/guy.png");
     var self = Self{
-        .player = objects.Player.init(45, 45, player_face),
-        .walls = try std.ArrayList(objects.Wall).initCapacity(allocator, 100),
+        .player = .init(45, 45, player_face),
+        .walls = try .initCapacity(allocator, 100),
         .allocator = allocator,
         .camera = undefined,
-        .arena_allocator = std.heap.ArenaAllocator.init(allocator),
+        .arena_allocator = .init(allocator),
     };
     self.camera = .{
         .target = .{
@@ -40,10 +42,10 @@ pub fn init(allocator: std.mem.Allocator) !Self {
         .rotation = 0,
     };
     for ([_]objects.Wall{
-        objects.Wall.init(100, 100, 200, 30),
-        objects.Wall.init(100, -100, 30, 200),
+        .init(100, 100, 200, 30),
+        .init(100, -100, 30, 200),
     }) |wall| {
-        try self.walls.append(wall);
+        try self.walls.append(allocator, wall);
     }
     return self;
 }
@@ -108,6 +110,6 @@ pub fn deinit(self: *Self) void {
         USERNAME = null;
     }
     self.player.deinit();
-    self.walls.deinit();
+    self.walls.deinit(self.allocator);
     self.arena_allocator.deinit();
 }
