@@ -1,6 +1,3 @@
-WARNING: THIS PROJECT CURRENTLY DOESN'T WORK UNTIL [raylib-zig](https://github.com/Not-Nik/raylib-zig) IS UPDATED TO 0.14.0\
-THE LIBRARY HAS BEEN DELETED UNTIL FURTHER NOTICE
-
 Game I'm working on... That's it.
 
 If you want to download and try it out, first download [Zig](https://ziglang.org/download/) and add it to your path
