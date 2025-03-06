@@ -119,7 +119,11 @@ pub const Player = struct {
             }
             if (do_update and self.face != null) {
                 const face = &self.face.?;
-                face.draw_x = if (face.draw_x == 0) face.draw_width else 0;
+                if (face.draw_x == face.draw_width * (face.sprite_chunks - 1)) {
+                    face.draw_x = 0;
+                } else {
+                    face.draw_x += face.draw_width;
+                }
                 do_update = false;
             }
         }
@@ -135,7 +139,11 @@ pub const Player = struct {
             }
             if (do_update and self.face != null) {
                 const face = &self.face.?;
-                face.draw_x = if (face.draw_x == 0) face.draw_width else 0;
+                if (face.draw_x == face.draw_width * (face.sprite_chunks - 1)) {
+                    face.draw_x = 0;
+                } else {
+                    face.draw_x += face.draw_width;
+                }
                 do_update = false;
             }
         }
@@ -151,7 +159,11 @@ pub const Player = struct {
             }
             if (do_update and self.face != null) {
                 const face = &self.face.?;
-                face.draw_x = if (face.draw_x == 0) face.draw_width else 0;
+                if (face.draw_x == face.draw_width * (face.sprite_chunks - 1)) {
+                    face.draw_x = 0;
+                } else {
+                    face.draw_x += face.draw_width;
+                }
                 do_update = false;
             }
         }
@@ -167,7 +179,11 @@ pub const Player = struct {
             }
             if (do_update and self.face != null) {
                 const face = &self.face.?;
-                face.draw_x = if (face.draw_x == 0) face.draw_width else 0;
+                if (face.draw_x == face.draw_width * (face.sprite_chunks - 1)) {
+                    face.draw_x = 0;
+                } else {
+                    face.draw_x += face.draw_width;
+                }
                 do_update = false;
             }
         }
