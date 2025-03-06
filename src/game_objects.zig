@@ -80,7 +80,7 @@ pub const Player = struct {
     face: ?Face,
     movement_speed: f32 = 300,
     rotation: f32 = 0,
-    limiter: RateLimiter = RateLimiter.init(0.5),
+    limiter: RateLimiter = .init(0.3),
 
     pub fn init(body_w: f32, body_h: f32, face_txtr: ?rl.Texture2D) Player {
         return .{
@@ -90,7 +90,7 @@ pub const Player = struct {
                 .width = body_w,
                 .height = body_h,
             },
-            .face = if (face_txtr) |txtr| .init(txtr, 2) else null,
+            .face = if (face_txtr) |txtr| .init(txtr, 4) else null,
         };
     }
 
