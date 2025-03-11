@@ -41,12 +41,10 @@ pub fn init(allocator: std.mem.Allocator) !Self {
         .zoom = 1,
         .rotation = 0,
     };
-    for ([_]objects.Wall{
+    try self.walls.appendSlice(allocator, &.{
         .init(100, 100, 200, 30),
         .init(100, -100, 30, 200),
-    }) |wall| {
-        try self.walls.append(allocator, wall);
-    }
+    });
     return self;
 }
 
