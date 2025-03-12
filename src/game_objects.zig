@@ -229,3 +229,71 @@ pub const Player = struct {
         }
     }
 };
+
+pub const SaveData = struct {
+    player_data: struct {
+        anim_stage: f32,
+        rotation: f32,
+        x: f32,
+        y: f32,
+    },
+    camera_zoom: f32,
+    debug_enabled: bool,
+    fullscreen: bool,
+    unlimited_fps: bool,
+};
+
+pub fn loadSave(allocator: std.mem.Allocator) !SaveData {
+    const file = std.fs.cwd().openFile("save.dat", .{}) catch |e| blk: {
+        if (e != error.FileNotFound) return e;
+
+        const created_file = try std.fs.cwd().createFile("save.dat", .{});
+        defer created_file.close();
+
+        try created_file.writeAll(
+            \\// ===============================================================
+            \\// DO NOT TOUCH THIS FILE
+            \\// IT IS USED FOR KEEPING TRACK OF GAME STATE
+            \\// TOUCHING THIS FILE WILL VOID ANY WARRANTY THAT YOU MIGHT'VE HAD
+            \\// ===============================================================
+            \\.{
+            \\    .player_data = .{
+            \\        .anim_stage = 0.0,
+            \\        .rotation = 0.0,
+            \\        .x = 0.0,
+            \\        .y = 0.0,
+            \\    },
+            \\    .camera_zoom = 1.0,
+            \\    .debug_enabled = false,
+            \\    .fullscreen = false,
+            \\    .unlimited_fps = false,
+            \\}
+        );
+
+        break :blk try std.fs.cwd().openFile("save.dat", .{});
+    };
+    defer file.close();
+
+    const content = try allocator.allocSentinel(u8, try file.getEndPos(), 0);
+    defer allocator.free(content);
+
+    _ = try file.readAll(content);
+
+    return try std.zon.parse.fromSlice(SaveData, allocator, content, null, .{});
+}
+
+pub fn putSave(data: SaveData) !void {
+    const file = try std.fs.cwd().createFile("save.dat", .{});
+    defer file.close();
+
+    try file.writeAll(
+        \\// ===============================================================
+        \\// DO NOT TOUCH THIS FILE
+        \\// IT IS USED FOR KEEPING TRACK OF GAME STATE
+        \\// TOUCHING THIS FILE WILL VOID ANY WARRANTY THAT YOU MIGHT'VE HAD
+        \\// ===============================================================
+        \\
+    );
+
+    try std.zon.stringify.serialize(data, .{}, file.writer());
+}

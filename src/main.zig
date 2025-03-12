@@ -49,15 +49,25 @@ pub fn main() !void {
 
     var fullscreener = Fullscreen.init();
 
-    var stage1 = try game.Stage1.init(allocator);
-    defer stage1.deinit() catch @panic("");
+    var save_data = try game.objects.loadSave(allocator);
+    defer std.zon.parse.free(allocator, save_data);
 
-    var unlimited_fps = stage1.save_data.unlimited_fps;
+    var unlimited_fps = save_data.unlimited_fps;
     rl.setTargetFPS(if (unlimited_fps) 0 else 60);
 
-    if (stage1.save_data.fullscreen) {
+    if (save_data.fullscreen) {
         fullscreener.toggle();
     }
+
+    var stage1 = try game.Stage1.init(allocator);
+    defer stage1.deinit();
+
+    stage1.player.body.x = save_data.player_data.x;
+    stage1.player.body.y = save_data.player_data.y;
+    stage1.player.rotation = save_data.player_data.rotation;
+    stage1.player.face.?.draw_x = save_data.player_data.anim_stage;
+    stage1.camera.zoom = save_data.camera_zoom;
+    stage1.draw_debug_info = save_data.debug_enabled;
 
     while (!rl.windowShouldClose()) {
         if (rl.isKeyPressed(.f11)) {
@@ -86,6 +96,14 @@ pub fn main() !void {
         try stage1.drawUI();
     }
 
-    stage1.save_data.unlimited_fps = unlimited_fps;
-    stage1.save_data.fullscreen = fullscreener.is_fullscreen;
+    save_data.unlimited_fps = unlimited_fps;
+    save_data.fullscreen = fullscreener.is_fullscreen;
+    save_data.player_data.x = stage1.player.body.x;
+    save_data.player_data.y = stage1.player.body.y;
+    save_data.player_data.rotation = stage1.player.rotation;
+    save_data.player_data.anim_stage = stage1.player.face.?.draw_x;
+    save_data.camera_zoom = stage1.camera.zoom;
+    save_data.debug_enabled = stage1.draw_debug_info;
+
+    try game.objects.putSave(save_data);
 }

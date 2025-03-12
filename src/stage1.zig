@@ -4,83 +4,13 @@ const objects = @import("game_objects.zig");
 const Self = @This();
 const ArrayList = std.ArrayListUnmanaged;
 
-pub const SaveData = struct {
-    player_data: struct {
-        anim_stage: f32,
-        rotation: f32,
-        x: f32,
-        y: f32,
-    },
-    camera_zoom: f32,
-    debug_enabled: bool,
-    fullscreen: bool,
-    unlimited_fps: bool,
-};
-
 player: objects.Player,
 walls: ArrayList(objects.Wall),
 camera: rl.Camera2D,
 allocator: std.mem.Allocator,
 arena_allocator: std.heap.ArenaAllocator,
-save_data: SaveData,
 username: ?[]const u8,
 draw_debug_info: bool,
-
-
-fn loadSave(allocator: std.mem.Allocator) !SaveData {
-    const file = std.fs.cwd().openFile("save.dat", .{}) catch |e| blk: {
-        if (e != error.FileNotFound) return e;
-
-        const created_file = try std.fs.cwd().createFile("save.dat", .{});
-        defer created_file.close();
-
-        try created_file.writeAll(
-            \\// ===============================================================
-            \\// DO NOT TOUCH THIS FILE
-            \\// IT IS USED FOR KEEPING TRACK OF GAME STATE
-            \\// TOUCHING THIS FILE WILL VOID ANY WARRANTY THAT YOU MIGHT'VE HAD
-            \\// ===============================================================
-            \\.{
-            \\    .player_data = .{
-            \\        .anim_stage = 0.0,
-            \\        .rotation = 0.0,
-            \\        .x = 0.0,
-            \\        .y = 0.0,
-            \\    },
-            \\    .camera_zoom = 1.0,
-            \\    .debug_enabled = false,
-            \\    .fullscreen = false,
-            \\    .unlimited_fps = false,
-            \\}
-        );
-
-        break :blk try std.fs.cwd().openFile("save.dat", .{});
-    };
-    defer file.close();
-
-    const content = try allocator.allocSentinel(u8, try file.getEndPos(), 0);
-    defer allocator.free(content);
-
-    _ = try file.readAll(content);
-
-    return try std.zon.parse.fromSlice(SaveData, allocator, content, null, .{});
-}
-
-fn putSave(data: SaveData) !void {
-    const file = try std.fs.cwd().createFile("save.dat", .{});
-    defer file.close();
-
-    try file.writeAll(
-        \\// ===============================================================
-        \\// DO NOT TOUCH THIS FILE
-        \\// IT IS USED FOR KEEPING TRACK OF GAME STATE
-        \\// TOUCHING THIS FILE WILL VOID ANY WARRANTY THAT YOU MIGHT'VE HAD
-        \\// ===============================================================
-        \\
-    );
-
-    try std.zon.stringify.serialize(data, .{}, file.writer());
-}
 
 pub fn init(allocator: std.mem.Allocator) !Self {
     const player_face = try rl.Texture2D.init("assets/guy.png");
@@ -95,16 +25,8 @@ pub fn init(allocator: std.mem.Allocator) !Self {
                 std.process.getEnvVarOwned(allocator, "USER") catch null
             else
                 null,
-        .save_data = undefined,
         .draw_debug_info = false,
     };
-    self.save_data = try loadSave(allocator);
-    self.player.body.x = self.save_data.player_data.x;
-    self.player.body.y = self.save_data.player_data.y;
-    self.player.rotation = self.save_data.player_data.rotation;
-    self.player.face.?.draw_x = self.save_data.player_data.anim_stage;
-    self.draw_debug_info = self.save_data.debug_enabled;
-
     self.camera = .{
         .target = .{
             .x = self.player.body.x,
@@ -114,7 +36,7 @@ pub fn init(allocator: std.mem.Allocator) !Self {
             .x = objects.screenWidthFloat()/2,
             .y = objects.screenHeightFloat()/2,
         },
-        .zoom = self.save_data.camera_zoom,
+        .zoom = 1,
         .rotation = 0,
     };
     try self.walls.appendSlice(allocator, &.{
@@ -178,18 +100,7 @@ pub fn drawReal(self: Self) void {
     self.player.draw();
 }
 
-pub fn deinit(self: *Self) !void {
-    self.save_data.camera_zoom = self.camera.zoom;
-    self.save_data.player_data.x = self.player.body.x;
-    self.save_data.player_data.y = self.player.body.y;
-    self.save_data.player_data.rotation = self.player.rotation;
-    self.save_data.player_data.anim_stage = self.player.face.?.draw_x;
-    self.save_data.debug_enabled = self.draw_debug_info;
-
-    try putSave(self.save_data);
-
-    std.zon.parse.free(self.allocator, self.save_data);
-
+pub fn deinit(self: *Self) void {
     if (self.username) |user| {
         self.allocator.free(user);
         self.username = null;
