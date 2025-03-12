@@ -13,6 +13,8 @@ pub const SaveData = struct {
     },
     camera_zoom: f32,
     debug_enabled: bool,
+    fullscreen: bool,
+    unlimited_fps: bool,
 };
 
 player: objects.Player,
@@ -47,6 +49,8 @@ fn loadSave(allocator: std.mem.Allocator) !SaveData {
             \\    },
             \\    .camera_zoom = 1.0,
             \\    .debug_enabled = false,
+            \\    .fullscreen = false,
+            \\    .unlimited_fps = false,
             \\}
         );
 
@@ -174,13 +178,15 @@ pub fn drawReal(self: Self) void {
     self.player.draw();
 }
 
-pub fn deinit(self: *Self) !void {
+pub fn deinit(self: *Self, unlimited_fps: bool, fullscreen: bool) !void {
     self.save_data.camera_zoom = self.camera.zoom;
     self.save_data.player_data.x = self.player.body.x;
     self.save_data.player_data.y = self.player.body.y;
     self.save_data.player_data.rotation = self.player.rotation;
     self.save_data.player_data.anim_stage = self.player.face.?.draw_x;
     self.save_data.debug_enabled = self.draw_debug_info;
+    self.save_data.unlimited_fps = unlimited_fps;
+    self.save_data.fullscreen = fullscreen;
 
     try putSave(self.save_data);
 

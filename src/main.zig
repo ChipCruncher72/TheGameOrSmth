@@ -49,13 +49,17 @@ pub fn main() !void {
 
     var fullscreener = Fullscreen.init();
 
-    var unlimited_fps = false;
-    rl.setTargetFPS(if (unlimited_fps) 0 else 60);
-
     var stage1 = try game.Stage1.init(allocator);
-    defer stage1.deinit() catch @panic("");
 
-    while (!rl.windowShouldClose() or rl.isKeyDown(.escape)) {
+    var unlimited_fps = stage1.save_data.unlimited_fps;
+    rl.setTargetFPS(if (unlimited_fps) 0 else 60);
+    defer stage1.deinit(unlimited_fps, fullscreener.is_fullscreen) catch @panic("");
+
+    if (stage1.save_data.fullscreen) {
+        fullscreener.toggle();
+    }
+
+    while (!rl.windowShouldClose()) {
         if (rl.isKeyPressed(.f11)) {
             // NOTE: Use this as opposed to rl.toggleBorderlessWindowed/rl.toggleFullscreen
             //  as those functions do not let you tab out of the window while in fullscreen
