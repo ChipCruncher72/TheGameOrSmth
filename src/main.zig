@@ -50,10 +50,10 @@ pub fn main() !void {
     var fullscreener = Fullscreen.init();
 
     var stage1 = try game.Stage1.init(allocator);
+    defer stage1.deinit() catch @panic("");
 
     var unlimited_fps = stage1.save_data.unlimited_fps;
     rl.setTargetFPS(if (unlimited_fps) 0 else 60);
-    defer stage1.deinit(unlimited_fps, fullscreener.is_fullscreen) catch @panic("");
 
     if (stage1.save_data.fullscreen) {
         fullscreener.toggle();
@@ -85,4 +85,7 @@ pub fn main() !void {
 
         try stage1.drawUI();
     }
+
+    stage1.save_data.unlimited_fps = unlimited_fps;
+    stage1.save_data.fullscreen = fullscreener.is_fullscreen;
 }
