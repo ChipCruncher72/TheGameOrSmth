@@ -274,10 +274,7 @@ pub fn loadSave(allocator: std.mem.Allocator) !SaveData {
     };
     defer file.close();
 
-    const content = try allocator.allocSentinel(u8, try file.getEndPos(), 0);
-    defer allocator.free(content);
-
-    _ = try file.readAll(content);
+    const content = try file.readToEndAllocOptions(allocator, std.math.maxInt(usize), null, @alignOf(u8), 0);
 
     return try std.zon.parse.fromSlice(SaveData, allocator, content, null, .{});
 }
