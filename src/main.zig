@@ -4,6 +4,7 @@ const game = struct {
     const objects = @import("game_objects.zig");
     const Stage1 = @import("stage1.zig");
 };
+const c = @import("c_lang");
 
 const Fullscreen = struct {
     is_fullscreen: bool = false,
@@ -40,7 +41,8 @@ const Fullscreen = struct {
 pub fn main() !void {
     const allocator = std.heap.page_allocator;
 
-    rl.setTraceLogLevel(.none);
+    _ = c.freopen("output.log", "w", c.get_stdout());
+    _ = c.freopen("output.log", "w", c.get_stderr());
 
     rl.setConfigFlags(.{ .window_resizable = true, .window_always_run = true });
 
