@@ -1,6 +1,6 @@
 Game I'm working on... That's it.
 
-IF YOU ENCOUNTER ANY ERRORS OR CRASHES COPY THE CONTENT OF THE OUTPUT.LOG FILE AND PASTE IT IN AN ISSUE
+IF YOU ENCOUNTER ANY ERRORS OR CRASHES COPY THE CONTENT OF THE OUTPUT.LOG FILE AND PASTE IT IN AN [ISSUE](https://github.com/ChipCruncher72/TheGameOrSmth/issues)
 
 If you want to download and try it out, first download [Zig](https://ziglang.org/download/) and add it to your path
 

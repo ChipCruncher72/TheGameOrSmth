@@ -44,6 +44,8 @@ pub fn main() !void {
     _ = c.freopen("output.log", "w", c.get_stdout());
     _ = c.freopen("output.log", "w", c.get_stderr());
 
+    rl.setTraceLogLevel(.all);
+
     rl.setConfigFlags(.{ .window_resizable = true, .window_always_run = true });
 
     rl.initWindow(1000, 800, "Game 2: Electric Boogaloo");
