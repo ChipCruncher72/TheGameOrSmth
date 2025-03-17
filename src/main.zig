@@ -4,7 +4,7 @@ const game = struct {
     const objects = @import("game_objects.zig");
     const Stage1 = @import("stage1.zig");
 };
-const c = @import("c_lang");
+const c_defs = @import("c_defs");
 
 const Fullscreen = struct {
     is_fullscreen: bool = false,
@@ -41,8 +41,8 @@ const Fullscreen = struct {
 pub fn main() !void {
     const allocator = std.heap.page_allocator;
 
-    _ = c.freopen("output.log", "w", c.get_stdout());
-    _ = c.freopen("output.log", "w", c.get_stderr());
+    _ = c_defs.freopen("output.log", "w", c_defs.get_stdout());
+    _ = c_defs.freopen("output.log", "w", c_defs.get_stderr());
 
     rl.setTraceLogLevel(.all);
 
