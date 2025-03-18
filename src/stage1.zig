@@ -14,10 +14,10 @@ draw_debug_info: bool,
 
 pub fn init(allocator: std.mem.Allocator) !Self {
     const guy_png = @embedFile("assets/guy.png");
-    const guy_image = try rl.loadImageFromMemory(".png", guy_png);
+    const guy_image = rl.loadImageFromMemory(".png", guy_png) catch unreachable;
     defer guy_image.unload();
 
-    const player_face = try rl.Texture2D.fromImage(guy_image);
+    const player_face = rl.Texture2D.fromImage(guy_image) catch unreachable;
     var self = Self{
         .player = .init(45, 45, player_face),
         .walls = try .initCapacity(allocator, 100),
