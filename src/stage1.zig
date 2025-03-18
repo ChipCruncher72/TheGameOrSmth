@@ -13,7 +13,11 @@ username: ?[]const u8,
 draw_debug_info: bool,
 
 pub fn init(allocator: std.mem.Allocator) !Self {
-    const player_face = try rl.Texture2D.init("assets/guy.png");
+    const guy_png = @embedFile("assets/guy.png");
+    const guy_image = try rl.loadImageFromMemory(".png", guy_png);
+    defer guy_image.unload();
+
+    const player_face = try rl.Texture2D.fromImage(guy_image);
     var self = Self{
         .player = .init(45, 45, player_face),
         .walls = try .initCapacity(allocator, 100),
