@@ -105,5 +105,5 @@ pub fn main() !void {
     save_data.camera_zoom = stage1.camera.zoom;
     save_data.debug_enabled = stage1.draw_debug_info;
 
-    try game.objects.putSave(save_data);
+    try game.objects.putSave(allocator, save_data);
 }

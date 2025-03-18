@@ -244,10 +244,31 @@ pub const SaveData = struct {
 };
 
 pub fn loadSave(allocator: std.mem.Allocator) !SaveData {
-    const file = std.fs.cwd().openFile("save.dat", .{}) catch |e| blk: {
+    const app_data = std.process.getEnvVarOwned(allocator, "APPDATA") catch |e|
+        if (e == error.EnviromentVariableNotFound) try allocator.dupe(u8, "~")
+        else return e;
+    defer allocator.free(app_data);
+
+
+    var save_folder = blk: {
+        var app_data_dir = try std.fs.openDirAbsolute(app_data, .{});
+        defer app_data_dir.close();
+
+        const folder_name = if (@import("builtin").os.tag == .windows) "AbominationGame" else ".abomination";
+
+        break :blk app_data_dir.openDir(folder_name, .{}) catch |e| {
+            if (e != error.FileNotFound) return e;
+
+            try app_data_dir.makeDir(folder_name);
+            break :blk try app_data_dir.openDir(folder_name, .{});
+        };
+    };
+    defer save_folder.close();
+
+    const file = save_folder.openFile("save.dat", .{}) catch |e| blk: {
         if (e != error.FileNotFound) return e;
 
-        const created_file = try std.fs.cwd().createFile("save.dat", .{});
+        const created_file = try save_folder.createFile("save.dat", .{});
         defer created_file.close();
 
         try created_file.writeAll(
@@ -270,7 +291,7 @@ pub fn loadSave(allocator: std.mem.Allocator) !SaveData {
             \\}
         );
 
-        break :blk try std.fs.cwd().openFile("save.dat", .{});
+        break :blk try save_folder.openFile("save.dat", .{});
     };
     defer file.close();
 
@@ -279,8 +300,24 @@ pub fn loadSave(allocator: std.mem.Allocator) !SaveData {
     return try std.zon.parse.fromSlice(SaveData, allocator, content, null, .{});
 }
 
-pub fn putSave(data: SaveData) !void {
-    const file = try std.fs.cwd().createFile("save.dat", .{});
+pub fn putSave(allocator: std.mem.Allocator, data: SaveData) !void {
+    const app_data = std.process.getEnvVarOwned(allocator, "APPDATA") catch |e|
+        if (e == error.EnviromentVariableNotFound) try allocator.dupe(u8, "~")
+        else return e;
+    defer allocator.free(app_data);
+
+
+    var save_folder = blk: {
+        var app_data_dir = try std.fs.openDirAbsolute(app_data, .{});
+        defer app_data_dir.close();
+
+        const folder_name = if (@import("builtin").os.tag == .windows) "AbominationGame" else ".abomination";
+
+        break :blk try app_data_dir.openDir(folder_name, .{});
+    };
+    defer save_folder.close();
+
+    const file = try save_folder.createFile("save.dat", .{});
     defer file.close();
 
     try file.writeAll(
