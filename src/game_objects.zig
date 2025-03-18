@@ -244,13 +244,12 @@ pub const SaveData = struct {
 };
 
 pub fn loadSave(allocator: std.mem.Allocator) !SaveData {
-    const app_data = std.process.getEnvVarOwned(allocator, "APPDATA") catch |e|
-        if (e == error.EnviromentVariableNotFound) try allocator.dupe(u8, "~")
-        else return e;
-    defer allocator.free(app_data);
-
-
     var save_folder = blk: {
+        const app_data = std.process.getEnvVarOwned(allocator, "APPDATA") catch |e|
+            if (e == error.EnviromentVariableNotFound) try allocator.dupe(u8, "~")
+            else return e;
+        defer allocator.free(app_data);
+    
         var app_data_dir = try std.fs.openDirAbsolute(app_data, .{});
         defer app_data_dir.close();
 
@@ -301,13 +300,12 @@ pub fn loadSave(allocator: std.mem.Allocator) !SaveData {
 }
 
 pub fn putSave(allocator: std.mem.Allocator, data: SaveData) !void {
-    const app_data = std.process.getEnvVarOwned(allocator, "APPDATA") catch |e|
-        if (e == error.EnviromentVariableNotFound) try allocator.dupe(u8, "~")
-        else return e;
-    defer allocator.free(app_data);
-
-
     var save_folder = blk: {
+        const app_data = std.process.getEnvVarOwned(allocator, "APPDATA") catch |e|
+            if (e == error.EnviromentVariableNotFound) try allocator.dupe(u8, "~")
+            else return e;
+        defer allocator.free(app_data);
+    
         var app_data_dir = try std.fs.openDirAbsolute(app_data, .{});
         defer app_data_dir.close();
 
