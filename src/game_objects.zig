@@ -119,11 +119,7 @@ pub const Player = struct {
             }
             if (do_update and self.face != null) {
                 const face = &self.face.?;
-                if (face.draw_x >= face.draw_width * (face.sprite_chunks - 1)) {
-                    face.draw_x = 0;
-                } else {
-                    face.draw_x += face.draw_width;
-                }
+                face.draw_x = @mod(face.draw_x + face.draw_width, face.draw_width * face.sprite_chunks);
                 do_update = false;
             }
         }
@@ -139,11 +135,7 @@ pub const Player = struct {
             }
             if (do_update and self.face != null) {
                 const face = &self.face.?;
-                if (face.draw_x >= face.draw_width * (face.sprite_chunks - 1)) {
-                    face.draw_x = 0;
-                } else {
-                    face.draw_x += face.draw_width;
-                }
+                face.draw_x = @mod(face.draw_x + face.draw_width, face.draw_width * face.sprite_chunks);
                 do_update = false;
             }
         }
@@ -159,11 +151,7 @@ pub const Player = struct {
             }
             if (do_update and self.face != null) {
                 const face = &self.face.?;
-                if (face.draw_x >= face.draw_width * (face.sprite_chunks - 1)) {
-                    face.draw_x = 0;
-                } else {
-                    face.draw_x += face.draw_width;
-                }
+                face.draw_x = @mod(face.draw_x + face.draw_width, face.draw_width * face.sprite_chunks);
                 do_update = false;
             }
         }
@@ -179,11 +167,7 @@ pub const Player = struct {
             }
             if (do_update and self.face != null) {
                 const face = &self.face.?;
-                if (face.draw_x >= face.draw_width * (face.sprite_chunks - 1)) {
-                    face.draw_x = 0;
-                } else {
-                    face.draw_x += face.draw_width;
-                }
+                face.draw_x = @mod(face.draw_x + face.draw_width, face.draw_width * face.sprite_chunks);
                 do_update = false;
             }
         }
@@ -249,7 +233,7 @@ pub fn loadSave(allocator: std.mem.Allocator) !SaveData {
             if (e == error.EnviromentVariableNotFound) try allocator.dupe(u8, "~")
             else return e;
         defer allocator.free(app_data);
-    
+
         var app_data_dir = try std.fs.openDirAbsolute(app_data, .{});
         defer app_data_dir.close();
 
@@ -305,7 +289,7 @@ pub fn putSave(allocator: std.mem.Allocator, data: SaveData) !void {
             if (e == error.EnviromentVariableNotFound) try allocator.dupe(u8, "~")
             else return e;
         defer allocator.free(app_data);
-    
+
         var app_data_dir = try std.fs.openDirAbsolute(app_data, .{});
         defer app_data_dir.close();
 
