@@ -37,8 +37,37 @@ const Fullscreen = struct {
     }
 };
 
+var debug_allocator = std.heap.DebugAllocator(.{}).init;
+const AutoAllocator = struct {
+    allocator: std.mem.Allocator,
+    is_debug: bool,
+
+    pub const init = if (@import("builtin").os.tag == .wasi) AutoAllocator{
+        .allocator = std.heap.wasm_allocator,
+        .is_debug = false,
+    } else switch (@import("builtin").mode) {
+        .Debug, .ReleaseSafe => AutoAllocator{
+            .allocator = debug_allocator.allocator(),
+            .is_debug = true,
+        },
+        else => AutoAllocator{
+            .allocator = std.heap.smp_allocator,
+            .is_debug = false,
+        },
+    };
+
+    pub fn deinit(self: AutoAllocator) void {
+        if (self.is_debug) {
+            _ = debug_allocator.deinit();
+        }
+    }
+};
+
 pub fn main() !void {
-    const allocator = std.heap.page_allocator;
+    const auto_alloc = AutoAllocator.init;
+    defer auto_alloc.deinit();
+
+    const allocator = auto_alloc.allocator;
 
     rl.setTraceLogLevel(.none);
 
