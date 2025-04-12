@@ -4,6 +4,7 @@ const game = struct {
     const objects = @import("game_objects.zig");
     const Stage1 = @import("stage1.zig");
 };
+const c_headers = @import("c_headers");
 
 const Fullscreen = struct {
     is_fullscreen: bool = false,
@@ -64,12 +65,34 @@ const AutoAllocator = struct {
 };
 
 pub fn main() !void {
+    _ = c_headers.freopen("output.log", "w", c_headers.get_stdout());
+    _ = c_headers.freopen("output.log", "w", c_headers.get_stderr());
+
+    realMain() catch |err| {
+        const output_log = try std.fs.cwd().createFile("output.log", .{});
+        defer output_log.close();
+
+        const writer = output_log.writer();
+
+        const err_trace = @errorReturnTrace();
+
+        try writer.print("{}\n", .{err});
+
+        if (err_trace) |trace| {
+            try writer.print("{}\n", .{trace});
+        }
+
+        return err;
+    };
+}
+
+pub fn realMain() !void {
     const auto_alloc = AutoAllocator.init;
     defer auto_alloc.deinit();
 
     const allocator = auto_alloc.allocator;
 
-    rl.setTraceLogLevel(.none);
+    rl.setTraceLogLevel(.all);
 
     rl.setConfigFlags(.{ .window_resizable = true, .window_always_run = true });
 
@@ -135,4 +158,19 @@ pub fn main() !void {
     save_data.debug_enabled = stage1.draw_debug_info;
 
     try game.objects.putSave(allocator, save_data);
+}
+
+pub const panic = std.debug.FullPanic(panicFn);
+
+pub fn panicFn(msg: []const u8, first_trace_addr: ?usize) noreturn {
+    const output_log = std.fs.cwd().createFile("output.log", .{}) catch std.process.exit(1);
+
+    const writer = output_log.writer();
+
+    writer.print("Panic! {s}\n", .{msg}) catch std.process.exit(1);
+
+    const debug_info = std.debug.getSelfDebugInfo() catch std.process.exit(1);
+    std.debug.writeCurrentStackTrace(writer, debug_info, std.io.tty.detectConfig(output_log), first_trace_addr) catch std.process.exit(1);
+
+    std.process.exit(1);
 }

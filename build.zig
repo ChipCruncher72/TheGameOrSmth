@@ -17,6 +17,12 @@ pub fn build(b: *std.Build) void {
         .preferred_optimize_mode = .ReleaseSafe,
     });
 
+    var headers = b.addTranslateC(.{
+        .root_source_file = b.path("headers.c"),
+        .optimize = optimize,
+        .target = target,
+    });
+
     const raylib_dep = b.dependency("raylib_zig", .{
         .target = target,
         .optimize = optimize,
@@ -32,8 +38,11 @@ pub fn build(b: *std.Build) void {
             .root_source_file = b.path("src/main.zig"),
             .target = target,
             .optimize = optimize,
+            .link_libc = true,
         }),
     });
+
+    exe.root_module.addImport("c_headers", headers.createModule());
 
     if (exe.rootModuleTarget().os.tag == .windows) {
         exe.subsystem = .Windows;

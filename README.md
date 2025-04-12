@@ -1,5 +1,8 @@
 Game I'm working on... That's it.
 
+If the game suddenly crashes, take the content from output.log and open an [issue](https://github.com/ChipCruncher72/TheGameOrSmth/issues/new).\
+Make sure to be descriptive and explain what you did when the game crashed.
+
 If you want to download and try it out, first download [Zig](https://ziglang.org/download/) and add it to your path
 
 Then run `zig build run` in the same directory as the `build.zig` file to run it\
