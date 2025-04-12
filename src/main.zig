@@ -65,28 +65,23 @@ const AutoAllocator = struct {
 };
 
 pub fn main() !void {
-    _ = c_headers.freopen("output.log", "w", c_headers.get_stdout());
-    _ = c_headers.freopen("output.log", "w", c_headers.get_stderr());
-
-    realMain() catch |err| {
-        const output_log = try std.fs.cwd().createFile("output.log", .{});
+    errdefer |err| blk: {
+        const output_log = std.fs.cwd().createFile("output.log", .{}) catch break :blk;
         defer output_log.close();
 
         const writer = output_log.writer();
 
         const err_trace = @errorReturnTrace();
 
-        try writer.print("{}\n", .{err});
+        writer.print("{}\n", .{err}) catch break :blk;
 
         if (err_trace) |trace| {
-            try writer.print("{}\n", .{trace});
+            writer.print("{}\n", .{trace}) catch break :blk;
         }
+    }
+    _ = c_headers.freopen("output.log", "w", c_headers.get_stdout());
+    _ = c_headers.freopen("output.log", "w", c_headers.get_stderr());
 
-        return err;
-    };
-}
-
-pub fn realMain() !void {
     const auto_alloc = AutoAllocator.init;
     defer auto_alloc.deinit();
 

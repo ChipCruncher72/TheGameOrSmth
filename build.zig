@@ -17,7 +17,7 @@ pub fn build(b: *std.Build) void {
         .preferred_optimize_mode = .ReleaseSafe,
     });
 
-    var headers = b.addTranslateC(.{
+    const headers = b.addTranslateC(.{
         .root_source_file = b.path("headers.c"),
         .optimize = optimize,
         .target = target,
@@ -39,6 +39,7 @@ pub fn build(b: *std.Build) void {
             .target = target,
             .optimize = optimize,
             .link_libc = true,
+            .error_tracing = true,
         }),
     });
 
