@@ -66,14 +66,16 @@ const AutoAllocator = struct {
 
 pub fn main() !void {
     errdefer |err| blk: {
-        const output_log = std.fs.cwd().createFile("output.log", .{}) catch break :blk;
+        const output_log = std.fs.cwd().openFile("output.log", .{
+            .mode = .read_write, // I want to be able to write to the file, but I don't want to truncate the Raylib log
+        }) catch (std.fs.cwd().createFile("output.log", .{}) catch break :blk);
         defer output_log.close();
 
         const writer = output_log.writer();
 
         const err_trace = @errorReturnTrace();
 
-        writer.print("{}\n", .{err}) catch break :blk;
+        writer.print("\n{}\n", .{err}) catch break :blk;
 
         if (err_trace) |trace| {
             writer.print("{}\n", .{trace}) catch break :blk;
@@ -118,7 +120,7 @@ pub fn main() !void {
 
     while (!rl.windowShouldClose()) {
         if (rl.isKeyPressed(.f11)) {
-            // NOTE: Use this as opposed to rl.toggleBorderlessWindowed/rl.toggleFullscreen
+            // INFO: Use this as opposed to rl.toggleBorderlessWindowed/rl.toggleFullscreen
             //  as those functions do not let you tab out of the window while in fullscreen
             fullscreener.toggle();
         }
@@ -158,14 +160,26 @@ pub fn main() !void {
 pub const panic = std.debug.FullPanic(panicFn);
 
 pub fn panicFn(msg: []const u8, first_trace_addr: ?usize) noreturn {
-    const output_log = std.fs.cwd().createFile("output.log", .{}) catch std.process.exit(1);
+    const output_log = std.fs.cwd().openFile("output.log", .{
+        .mode = .read_write, // Same reasoning in main function
+    }) catch (std.fs.cwd().createFile("output.log", .{}) catch std.process.exit(1));
 
     const writer = output_log.writer();
 
-    writer.print("Panic! {s}\n", .{msg}) catch std.process.exit(1);
+    writer.print("\nPanic! {s}\n", .{msg}) catch {
+        output_log.close();
+        std.process.exit(1);
+    };
 
-    const debug_info = std.debug.getSelfDebugInfo() catch std.process.exit(1);
-    std.debug.writeCurrentStackTrace(writer, debug_info, std.io.tty.detectConfig(output_log), first_trace_addr) catch std.process.exit(1);
+    const debug_info = std.debug.getSelfDebugInfo() catch {
+        output_log.close();
+        std.process.exit(1);
+    };
+    std.debug.writeCurrentStackTrace(writer, debug_info, std.io.tty.detectConfig(output_log), first_trace_addr) catch {
+        output_log.close();
+        std.process.exit(1);
+    };
 
+    output_log.close();
     std.process.exit(1);
 }
