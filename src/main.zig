@@ -66,9 +66,9 @@ const AutoAllocator = struct {
 
 pub fn main() !void {
     errdefer |err| blk: {
-        const output_log = std.fs.cwd().openFile("output.log", .{
-            .mode = .read_write, // I want to be able to write to the file, but I don't want to truncate the Raylib log
-        }) catch (std.fs.cwd().createFile("output.log", .{}) catch break :blk);
+        const output_log = std.fs.cwd().createFile("output.log", .{
+            .truncate = false,
+        }) catch break :blk;
         defer output_log.close();
 
         const writer = output_log.writer();
@@ -160,9 +160,9 @@ pub fn main() !void {
 pub const panic = std.debug.FullPanic(panicFn);
 
 pub fn panicFn(msg: []const u8, first_trace_addr: ?usize) noreturn {
-    const output_log = std.fs.cwd().openFile("output.log", .{
-        .mode = .read_write, // Same reasoning in main function
-    }) catch (std.fs.cwd().createFile("output.log", .{}) catch std.process.exit(1));
+    const output_log = std.fs.cwd().createFile("output.log", .{
+        .truncate = false,
+    }) catch std.process.exit(1);
 
     const writer = output_log.writer();
 
