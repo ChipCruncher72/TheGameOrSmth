@@ -65,22 +65,27 @@ const AutoAllocator = struct {
 };
 
 pub fn main() !void {
-    errdefer |err| blk: {
+    mainReal() catch |err| {
         const output_log = std.fs.cwd().createFile("output.log", .{
             .truncate = false,
-        }) catch break :blk;
+        }) catch return err;
         defer output_log.close();
 
         const writer = output_log.writer();
 
         const err_trace = @errorReturnTrace();
 
-        writer.print("\n{}\n", .{err}) catch break :blk;
+        writer.print("\n{}\n", .{err}) catch return err;
 
         if (err_trace) |trace| {
-            writer.print("{}\n", .{trace}) catch break :blk;
+            writer.print("{}\n", .{trace}) catch return err;
         }
-    }
+
+        return err;
+    };
+}
+
+pub fn mainReal() !void {
     _ = c_headers.freopen("output.log", "w", c_headers.get_stdout());
     _ = c_headers.freopen("output.log", "w", c_headers.get_stderr());
 
