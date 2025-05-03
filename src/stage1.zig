@@ -18,7 +18,7 @@ pub fn init(allocator: std.mem.Allocator) !Self {
     defer guy_image.unload();
 
     const player_face = rl.Texture2D.fromImage(guy_image) catch unreachable;
-    var self = Self{
+    var self: Self = .{
         .player = .init(45, 45, player_face),
         .walls = try .initCapacity(allocator, 100),
         .allocator = allocator,

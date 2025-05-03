@@ -63,7 +63,7 @@ pub const Face = struct {
     sprite_chunks: f32,
 
     pub fn init(txtr: rl.Texture2D, sprite_chunks: f32) Face {
-        var self = Face{
+        var self: Face = .{
             .txtr = txtr,
             .sprite_chunks = sprite_chunks,
             .draw_width = undefined,

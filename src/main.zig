@@ -43,15 +43,15 @@ const AutoAllocator = struct {
     allocator: std.mem.Allocator,
     is_debug: bool,
 
-    pub const init = if (@import("builtin").os.tag == .wasi) AutoAllocator{
+    pub const init: AutoAllocator = if (@import("builtin").os.tag == .wasi) .{
         .allocator = std.heap.wasm_allocator,
         .is_debug = false,
     } else switch (@import("builtin").mode) {
-        .Debug, .ReleaseSafe => AutoAllocator{
+        .Debug, .ReleaseSafe => .{
             .allocator = debug_allocator.allocator(),
             .is_debug = true,
         },
-        else => AutoAllocator{
+        else => .{
             .allocator = std.heap.smp_allocator,
             .is_debug = false,
         },
